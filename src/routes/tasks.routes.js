@@ -10,6 +10,8 @@ router.post('/', isAuthRequired, taskController.create);
 router.get('/', isAuthRequired, taskController.findAll);
 router.get('/:id', isAuthRequired, taskController.findOne);
 router.put('/:id', isAuthRequired, taskController.update);
+router.patch('/completed/:id', isAuthRequired, taskController.completedTask);
+router.patch('/uncompleted/:id', isAuthRequired, taskController.uncompletedTask);
 router.delete('/:id', isAuthRequired, taskController.delete);
 
 

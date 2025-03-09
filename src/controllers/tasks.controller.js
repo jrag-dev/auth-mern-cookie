@@ -61,7 +61,10 @@ class TaskController {
     const { id } = req.params;
 
     try {
-      const task = await Task.findOne({ _id: id, user: userId });
+      const task = await Task
+        .findOne({ _id: id, user: userId })
+        .populate("user");
+
       if (!task) {
         const error = new Error('Tarea no encontrada');
         return res.status(404).json(
@@ -89,11 +92,30 @@ class TaskController {
   }
 
   async update(req, res) {
-    try {
-      res.status(201).json(
+    const {title, description } = req.body;
+    const { id: userId } = req.user;
+    const { id } = req.params;
+
+    const task = await Task.findOne({ _id: id, user: userId });
+    if (!task) {
+      const error = new Error('Tarea no encontrada');
+      return res.status(404).json(
         {
-          message: 'Tarea creada correctamente',
-          success: true
+          message: error.message,
+          success: false
+        }
+      )
+    }
+    try {
+      task.title = title || task.title;
+      task.description = description || task.description;
+      const updatedTask = await task.save();
+
+      res.status(200).json(
+        {
+          message: 'Tarea actualizada correctamente',
+          success: true,
+          task: updatedTask._doc
         }
       )
     } catch (err) {
@@ -106,12 +128,101 @@ class TaskController {
     }
   }
 
-    async delete(req, res) {
-    try {
-      res.status(201).json(
+  async delete(req, res) {
+    const { id: userId } = req.user;
+    const { id } = req.params;
+
+    const task = await Task.findOne({ _id: id, user: userId });
+    if (!task) {
+      const error = new Error('Tarea no encontrada');
+      return res.status(404).json(
         {
-          message: 'Tarea creada correctamente',
-          success: true
+          message: error.message,
+          success: false
+        }
+      )
+    }
+
+    try {
+      const deletedTask = await Task.findOneAndDelete({ _id: id });
+      console.log(deletedTask)
+      res.status(200).json(
+        {
+          message: 'Tarea eliminada correctamente',
+          success: true,
+          task: deletedTask
+        }
+      )
+    } catch (err) {
+      res.status(500).json(
+        {
+          message: err.message,
+          success: false
+        }
+      )
+    }
+  }
+
+  async completedTask(req, res) {
+    const { id: userId } = req.user;
+    const { id } = req.params;
+
+    const task = await Task.findOne({ _id: id, user: userId });
+    if (!task) {
+      const error = new Error('Tarea no encontrada');
+      return res.status(404).json(
+        {
+          message: error.message,
+          success: false
+        }
+      )
+    }
+
+    try {
+      task.completed = true;
+      await task.save();
+
+      res.status(200).json(
+        {
+          message: 'Tarea completada correctamente',
+          success: true,
+          task
+        }
+      )
+    } catch (err) {
+      res.status(500).json(
+        {
+          message: err.message,
+          success: false
+        }
+      )
+    }
+  }
+
+  async uncompletedTask(req, res) {
+    const { id: userId } = req.user;
+    const { id } = req.params;
+
+    const task = await Task.findOne({ _id: id, user: userId });
+    if (!task) {
+      const error = new Error('Tarea no encontrada');
+      return res.status(404).json(
+        {
+          message: error.message,
+          success: false
+        }
+      )
+    }
+
+    try {
+      task.completed = false;
+      await task.save();
+
+      res.status(200).json(
+        {
+          message: 'Estado de la tarea actualizado correctamente',
+          success: true,
+          task
         }
       )
     } catch (err) {
