@@ -11,6 +11,7 @@ const authController = new AuthController();
 router.post('/register', validateSchema(registerSchema), authController.register);
 router.post('/login', validateSchema(loginSchema), authController.login);
 router.post('/logout', authController.logout);
+router.post('/verify-access-token', authController.verifyAccessToken);
 
 // Private routes
 router.get('/profile', isAuthRequired, authController.profile)

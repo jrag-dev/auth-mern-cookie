@@ -1,6 +1,9 @@
 import express from 'express';
 import morgan from 'morgan';
 import helmet from 'helmet';
+import cors from 'cors';
+import cookieParser from 'cookie-parser';
+
 import 'dotenv/config';
 import './database/db.js';
 
@@ -16,9 +19,15 @@ class App {
   }
 
   middlewares() {
+    const options = {
+      origin: 'http://localhost:5173',
+      credentials: true
+    }
     this.app.use(morgan('dev'));
     this.app.use(helmet());
     this.app.use(express.json());
+    this.app.use(cors(options));
+    this.app.use(cookieParser())
   }
 
   routes() {

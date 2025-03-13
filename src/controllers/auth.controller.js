@@ -1,6 +1,8 @@
+import jwt from 'jsonwebtoken';
 import User from '../models/users.model.js';
 import { comparePassword, hashed } from '../libs/bcrypt.js';
 import { createAccessToken } from '../libs/jsonWebToken.js';
+
 
 
 class AuthController {
@@ -100,7 +102,12 @@ class AuthController {
         }
       )
 
-      res.cookie('auth_token', token);
+      res.cookie('auth_token', token, {
+        expires: new Date(Date.now() + 900000),
+        sameSite: "none",
+        httpOnly: false,
+        secure: true
+      });
 
       res.status(200).json(
         {
@@ -161,6 +168,38 @@ class AuthController {
         message: err.message
       })
     }
+  }
+
+  async verifyAccessToken(req, res) {
+    console.log(req.cookies);
+    const { auth_token } = req.cookies;
+
+    if (!auth_token) {
+      const error = new Error('Unauthorized');
+      return res.status(401).json({ message: error.message, success: false })
+    }
+
+    jwt.verify(auth_token, process.env.JWT_SECRET_KEY, async (err, decoded) => {
+      if (err) {
+        const error = new Error('Unauthorized');
+        return res.status(401).json({ message: error.message, success: false })
+      }
+
+      const user = await User.findOne({ _id: decoded.id });
+      if (!user) {
+        const error = new Error('Unauthorized');
+        return res.status(401).json(
+          { message: error.message, success: false }
+        )
+      }
+
+      return res.status(200).json(
+        {
+          ...user._doc,
+          password: undefined
+        }
+      )
+    })
   }
 
 }
