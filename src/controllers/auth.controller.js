@@ -171,7 +171,6 @@ class AuthController {
   }
 
   async verifyAccessToken(req, res) {
-    console.log(req.cookies);
     const { auth_token } = req.cookies;
 
     if (!auth_token) {
