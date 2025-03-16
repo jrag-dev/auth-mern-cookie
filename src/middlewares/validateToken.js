@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 export const isAuthRequired = (req, res, next) => {
 
   const auth_token = req.headers.cookie && req.headers.cookie.split('=')[1];
+  console.log(auth_token)
   if (!auth_token) {
     const error = new Error('Token de acceso no enviado');
     return res.status(401).json(

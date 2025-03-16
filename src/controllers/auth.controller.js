@@ -40,7 +40,12 @@ class AuthController {
         }
       )
 
-      res.cookie('auth_token', token);
+      res.cookie('auth_token', token, {
+        expires: new Date(Date.now() + 900000),
+        sameSite: "none",
+        httpOnly: false,
+        secure: true // Change to false en development mode
+      });
 
       res.status(201).json(
         {
@@ -53,6 +58,7 @@ class AuthController {
         }
        )
     } catch (err) {
+      console.log(err)
       res.status(500).json({
         success: false,
         message: err.message
@@ -120,6 +126,7 @@ class AuthController {
         }
        )
     } catch (err) {
+      console.log(err)
       res.status(500).json({
         success: false,
         message: err.message
